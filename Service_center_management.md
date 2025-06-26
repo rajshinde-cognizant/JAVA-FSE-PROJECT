@@ -1,7 +1,21 @@
+## Table of Contents
+
+1. [Service Center Management Service](#service-center-management-service)
+2. [Overview](#overview)
+3. [Architecture](#architecture)
+   - Enhanced Component Diagram
+4. [Database Table Design](#database-table-design)
+   - Table: ServiceCenter
+   - Table: Mechanic
+   - Table: ServiceType
+5. [Endpoints](#endpoints)
+6. [Sequence Diagram](#sequence-diagram)
+
 
 # Service Center Management Service
 
-The Service Center Management Service is a core module of the Vehicle Management System. It handles the management of service centers, mechanics, and service types.
+- The Service Center Management Service is a core module of the Vehicle Management System. 
+- It handles the management of service centers, mechanics, and service types.
 
 ---
 
@@ -15,13 +29,22 @@ The Service Center Management Service is a core module of the Vehicle Management
 
 ## Architecture
 
+### Enhanced Component Diagram
+
 ```mermaid
 graph TD
-    A[API Gateway] --> B[Service Center Service]
-    B --> C[Service Center Controller]
-    C --> D[Service Center Service Layer]
-    D --> E[Service Center Repository]
-    E --> F[H2 Database - Service Center]
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style B fill:#bbf,stroke:#333,stroke-width:2px
+    style C fill:#bfb,stroke:#333,stroke-width:2px
+    style D fill:#bff,stroke:#333,stroke-width:2px
+    style E fill:#ffb,stroke:#333,stroke-width:2px
+    style F fill:#fbb,stroke:#333,stroke-width:2px
+
+    A[📡 API Gateway] --> B[🛠️ Service Center Service]
+    B --> C[📂 Controller]
+    C --> D[⚙️ Service Layer]
+    D --> E[🗃️ Repository]
+    E --> F[🛢️ H2 Database - Service Center]
 
     subgraph Service Center Service
         C
@@ -30,9 +53,8 @@ graph TD
     end
 ```
 
-## Database Table Design
 
-### Service Center Management Service
+## Database Table Design
 
 #### Table: `ServiceCenter`
 
@@ -64,8 +86,6 @@ graph TD
 
 ## Endpoints
 
-### Service Center Management Service
-
 | Method | Endpoint                                 | Description                          |
 |--------|------------------------------------------|--------------------------------------|
 | POST   | `/api/service-centers`                   | Add a new service center             |
@@ -77,9 +97,9 @@ graph TD
 | GET    | `/api/service-types`                     | List all service types               |
 
 Swagger url - http://localhost:8085/swagger-ui/index.html#/student-controller/createStudent
-## Sequence Diagrams
 
-### Service Center Management Service
+## Sequence Diagram
+
 
 ```mermaid
  sequenceDiagram
