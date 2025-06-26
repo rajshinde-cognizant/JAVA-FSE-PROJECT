@@ -1,22 +1,14 @@
-## Table of Contents
-
-1. [Service Center Management Service](#service-center-management-service)
-2. [Overview](#overview)
-3. [Architecture](#architecture)
-   - Enhanced Component Diagram
-4. [Database Table Design](#database-table-design)
-   - Table: ServiceCenter
-   - Table: Mechanic
-   - Table: ServiceType
-5. [Endpoints](#endpoints)
-6. [Sequence Diagram](#sequence-diagram)
-
-
 # Service Center Management Service
 
-- The Service Center Management Service is a core module of the Vehicle Management System. 
-- It handles the management of service centers, mechanics, and service types.
+## Table of Contents
 
+- [Overview](#overview)
+- [Component Diagram](#component-diagram)
+- [Database Table Design](#database-table-design)
+- [Endpoints](#endpoints)
+- [Key Features](#key-features)
+- [Sequence Diagram](#sequence-diagram)
+- [Swagger Documentation](#swagger-documentation)
 ---
 
 ## Overview
@@ -27,9 +19,8 @@
 
 ---
 
-## Architecture
+## Component Diagram
 
-### Enhanced Component Diagram
 
 ```mermaid
 graph TD
@@ -52,8 +43,24 @@ graph TD
         E
     end
 ```
+---
+## Key Features
+- **Service Center Registry**
+    -Add, view, and manage service center details including location and contact info.
 
+- **Mechanic Management**
+    - Assign mechanics to service centers and track their expertise.
 
+- **Service Type Catalog**
+    - Define and list various vehicle service types with pricing.
+
+- **RESTful API Support**
+    - Full CRUD operations for service centers, mechanics, and service types.
+
+- **Inter-Service Communication**
+    - Provides service data to other modules like Invoice Service.
+
+---
 ## Database Table Design
 
 #### Table: `ServiceCenter`
@@ -96,8 +103,7 @@ graph TD
 | POST   | `/api/service-types`                     | Define a new service type            |
 | GET    | `/api/service-types`                     | List all service types               |
 
-Swagger url - http://localhost:8085/swagger-ui/index.html#/student-controller/createStudent
-
+---
 ## Sequence Diagram
 
 
@@ -115,3 +121,10 @@ Swagger url - http://localhost:8085/swagger-ui/index.html#/student-controller/cr
     ServiceCenterService-->>API Gateway: Response
     API Gateway-->>Admin: Service center added 
 ```
+---
+## Swagger Documentation
+The Service Center Management Service provides interactive API documentation using Swagger.
+
+### Access Swagger UI
+Swagger UI for User Service
+    - http://localhost:8085/swagger-ui/index.html
