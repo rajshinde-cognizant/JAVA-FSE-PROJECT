@@ -1,85 +1,58 @@
 # Invoice and Billing Service
 
-## Table of Contents
+## Contributor
+- Rajvardhan Shinde
 
+## 📚 Table of Contents
 - [Overview](#overview)
+- [Features](#features)
+- [Folder Structure](#folder-structure)
+- [REST API Endpoints](#rest-api-endpoints)
+- [Data Model](#data-model)
+- [Module Architecture Diagram](#module-architecture-diagram)
 - [Component Diagram](#component-diagram)
-- [Database Table Design](#database-table-design)
-- [Endpoints](#endpoints)
-- [Key Features](#key-features)
 - [Sequence Diagram](#sequence-diagram)
 - [Swagger Documentation](#swagger-documentation)
----
+- [Run Locally](#run-locally)
 
+---
 
 ## Overview
-- **Manages**: Invoices, payment statuses, and invoice downloads.
-- **Provides**: RESTful endpoints for invoice generation, retrieval, status updates, and PDF downloads.
-- **Communication**: Interacts with the Booking Service and Service Center Management Service via Feign Clients to fetch booking and service type details.
+The Invoice and Billing Service is a Spring Boot microservice within the Vehicle Management System. It handles invoice generation, payment tracking, and PDF downloads. It communicates with other services like Booking and Service Center via Feign Clients and is registered with Eureka for service discovery.
+
 ---
-## Component Diagram
 
-```mermaid
- graph TD
+## Features
 
-    style A fill:#f9f,stroke:#333,stroke-width:2px
-    style B fill:#bbf,stroke:#333,stroke-width:2px
-    style C fill:#bfb,stroke:#333,stroke-width:2px
-    style D fill:#bff,stroke:#333,stroke-width:2px
-    style E fill:#ffb,stroke:#333,stroke-width:2px
-    style F fill:#fbb,stroke:#333,stroke-width:2px
-    style G fill:#cfc,stroke:#333,stroke-width:2px
-    style H fill:#ccf,stroke:#333,stroke-width:2px
+- Generate invoices based on bookings and service types
+- Track payment status
+- Download invoice as PDF
+- Integrate with Booking and Service Center services
+- Registered with Eureka Discovery
+- Routed via API Gateway
 
+---
 
-    A[API Gateway] --> B[Invoice Service]
-    B --> C[Invoice Controller]
-    C --> D[Invoice Service Layer]
-    D --> E[Invoice Repository]
-    E --> F[H2 Database - Invoice]
-    D -- Feign Client --> G[Booking Service]
-    D -- Feign Client --> H[Service Center Service]
-
-    subgraph Invoice Service
-        C
-        D
-        E
-    end
+## Folder Structure
+```plaintext
+src/
+└── main/
+    ├── java/
+    │   └── com.vehicle.invoice/
+    │       ├── client/            # Feign clients for inter-service communication
+    │       ├── config/            # Configuration classes (e.g., Feign, Swagger)
+    │       ├── controller/        # REST controllers
+    │       ├── dto/               # Data Transfer Objects
+    │       ├── entity/            # JPA Entities
+    │       ├── repository/        # Spring Data Repositories
+    │       └── service/           # Business logic layer
+    └── resources/
+        └── application.properties  # App configuration
 ```
----
-
-## Key Features
-- **Invoice Generation**
-    -Automatically create invoices based on bookings and selected service types.
-
-- **Payment Tracking**
-    - Update and monitor payment status (e.g., Paid, Pending).
-
-- **PDF Export**
-    - Download invoices in PDF format for record-keeping.
-
-- **Service Integration**
-    - Full CRUD operations for service centers, mechanics, and service types.
-
-- **Microservice Ready**
-    - Designed for scalability and integration in a distributed system.
- ---
- 
-## Database Table Design
-
-#### Table: `Invoice`
-
-| Field Name       | Data Type     | Description                              |
-|------------------|---------------|------------------------------------------|
-| `InvoiceID`      | `INT`         | Primary Key, unique identifier           |
-| `BookingID`      | `INT`         | Foreign Key referencing `BookingID`      |
-| `ServiceTypeID`  | `INT`         | Foreign Key referencing `ServiceTypeID`  |
-| `TotalAmount`    | `DECIMAL(10,2)`| Total amount charged                     |
-| `PaymentStatus`  | `VARCHAR(20)` | Status of the payment (e.g., Paid)       |
 
 ---
 
-## Endpoints
+## REST API Endpoints
 
 | Method | Endpoint                                 | Description                          |
 |--------|------------------------------------------|--------------------------------------|
@@ -91,31 +64,146 @@
 
 ---
 
+## Data Model
+
+### Invoice Entity
+
+| Field Name       | Data Type       | Description                              |
+|------------------|------------------|------------------------------------------|
+| `invoiceId`      | INT              | Primary Key, unique identifier           |
+| `bookingId`      | INT              | Foreign Key referencing `BookingID`      |
+| `serviceTypeId`  | INT              | Foreign Key referencing `ServiceTypeID`  |
+| `totalAmount`    | DECIMAL(10,2)    | Total amount charged                     |
+| `paymentStatus`  | VARCHAR(20)      | Status of the payment (e.g., Paid)       |
+
+---
+
+## Module Architecture Diagram
+
+```mermaid
+flowchart LR
+  A[/api/invoices/] --> B[InvoiceController]
+  B --> C[InvoiceService]
+  C --> D[InvoiceRepository]
+  D --> E[(invoice_db<br>MySQL Database)]
+  C --> F[FeignClient: BookingService]
+  C --> G[FeignClient: ServiceCenterService]
+
+  %% Color Scheme Styling
+  classDef endpoint fill:#cce5ff,stroke:#339af0,color:#003566
+  classDef controller fill:#ffe8cc,stroke:#ff922b,color:#7f4f24
+  classDef service fill:#d3f9d8,stroke:#51cf66,color:#1b4332
+  classDef repository fill:#e0f7fa,stroke:#00bcd4,color:#006064
+  classDef database fill:#e6e6fa,stroke:#b39ddb,color:#4a148c
+  classDef feign fill:#f1f3f5,stroke:#868e96,color:#343a40
+
+  class A endpoint
+  class B controller
+  class C service
+  class D repository
+  class E database
+  class F,G feign
+```
+
+_This diagram illustrates the layered architecture:_
+
+- API Gateway routes requests
+- InvoiceController handles HTTP requests
+- Business logic sits in InvoiceService
+- Data access is handled by InvoiceRepository
+- Data is persisted to a MySQL database
+- The service is registered with Eureka for discovery
+
+## Component Diagram
+
+```mermaid
+flowchart LR
+
+  subgraph Frontend [Vehicle UI]
+    direction TB
+    A1[Invoice UI Components]
+    A2[Invoice API Client]
+  end
+
+  subgraph Backend [Spring Boot]
+    direction TB
+    B1[InvoiceController]
+    B2[InvoiceService]
+    B3[InvoiceRepository]
+  end
+
+  subgraph Database [MySQL Database]
+    direction TB
+    C1[(Invoice Table)]
+  end
+
+  D1[Invoice DTO]
+  D2[Invoice Entity]
+
+  A2 -->|HTTP/REST| B1
+  B1 -->|Calls| B2
+  B2 -->|Calls| B3
+  B3 -->|Manages| C1
+
+
+  B1 ---|uses| D1
+  B3 ---|maps to| D2
+
+  classDef frontend fill:#dae8fc,stroke:#6c8ebf,color:#1a237e
+  classDef backend fill:#d5e8d4,stroke:#82b366,color:#1b4332
+  classDef storage fill:#e8def8,stroke:#8e44ad,color:#4a148c
+  classDef model fill:#fff2cc,stroke:#d6b656,color:#7f4f24
+
+  class A1,A2 frontend
+  class B1,B2,B3 backend
+  class C1 storage
+  class D1,D2 model
+```
+
+---
+
 ## Sequence Diagram
 
 ```mermaid
- sequenceDiagram
-    participant User
-    participant API Gateway
-    participant InvoiceService
-    participant BookingService
-    participant ServiceCenterService
-    participant InvoiceDB
+sequenceDiagram
+  actor UI as Vehicle Frontend
+  participant G as API Gateway
+  participant C as InvoiceController
+  participant S as InvoiceService
+  participant B as BookingService
+  participant SC as ServiceCenterService
+  participant R as InvoiceRepository
+  participant DB as InvoiceDB
 
-    User->>API Gateway: POST /api/invoices
-    API Gateway->>InvoiceService: Route request
-    InvoiceService->>BookingService: Fetch booking details
-    InvoiceService->>ServiceCenterService: Fetch service type info
-    InvoiceService->>InvoiceDB: Save invoice
-    InvoiceDB-->>InvoiceService: Confirmation
-    InvoiceService-->>API Gateway: Invoice created
-    API Gateway-->>User: Invoice details 
+  UI->>G: POST /api/invoices
+  G->>C: Route request
+  C->>S: createInvoice()
+  S->>B: getBookingDetails()
+  S->>SC: getServiceTypeInfo()
+  S->>R: save(invoice)
+  R->>DB: INSERT INTO Invoice
+  R-->>S: Return Saved Invoice
+  S-->>C: Return InvoiceDto
+  C-->>G: Invoice Created
+  G-->>UI: 201 Created (InvoiceDto)
 ```
----
-
 ## Swagger Documentation
-The Invoice and Billing Service provides interactive API documentation using Swagger.
+The User Service provides interactive API documentation using Swagger.
 
 ### Access Swagger UI
-Swagger UI for User Service
+Swagger UI for Invoice Service
     - http://localhost:8086/swagger-ui/index.html
+
+
+---
+
+## Run Locally
+
+```bash
+# Backend
+cd invoice-service
+mvn clean install
+mvn spring-boot:run
+```
+
+---
