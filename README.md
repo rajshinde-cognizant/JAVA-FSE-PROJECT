@@ -1,194 +1,287 @@
-# Vehicle Management System
+# 🚗 Vehicle Service Booking System (VSBS)
 
-The Vehicle Management System is a microservices-based application designed to manage users, vehicles, service centers, and billing. It comprises several interconnected services that work together to provide a comprehensive solution for vehicle service booking and management.
+## 📑 Table of Contents
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Architecture Diagram](#architecture-diagram)
+- [Module Overview](#module-overview)
+  - [User Management Module](#user-management-module)
+  - [Vehicle Management Module](#vehicle-management-module)
+  - [Service Booking Module](#service-booking-module)
+  - [Service Center Management Module](#service-center-management-module)
+  - [Invoice and Billing Module](#invoice-and-billing-module)
+- [Setup Instructions](#setup-instructions)
+- [Testing](#testing)
+- [Deployment](#deployment)
+- [Contributors](#contributors)
+- [License](#license)
 
 ---
 
-## Project Overview
+## Overview
 
-This system is built using a microservices architecture, leveraging Spring Boot and Spring Cloud to create a scalable and resilient application. The core functionalities include user registration, vehicle management, service center operations, invoice generation, and payment tracking.
+The **Vehicle Service Booking System** is a full-stack web application that allows users to:
+- Book vehicle service appointments,
+- Track service history and status,
+- Manage service centers and available services, and
+- Handle billing and invoice generation.
+
+It supports modular microservice architecture and is developed using Java (Spring Boot) or ASP.NET Core for backend, and Angular or React for the frontend. The database layer is built on top of MySQL/PostgreSQL.
 
 ---
 
-## Architecture
+## Features
 
-The system is composed of the following microservices:
+- **User Management**: Registration, login, profile, and service history
+- **Vehicle Management**: Manage vehicles linked to user accounts
+- **Service Booking**: Book, cancel, reschedule services and track status
+- **Service Center Management**: Manage mechanics and service types
+- **Billing and Invoicing**: Generate and track invoices and payments
 
-### Service Center Management Service
+---
 
-- **Description**: Manages service centers, mechanics, and service types.
-- **Functionality**: Provides RESTful endpoints for CRUD operations on service centers, mechanics, and service types.
-- **Communication**: Can be queried by other services (e.g., Invoice Service) to fetch service-related data.
+## Tech Stack
 
-### Service Center Management Service Architecture
+- **Backend**: Java Spring Boot 
+- **Frontend**: React.js   
+- **Database**: MySQL   
+- **API Documentation**: Swagger
+- **Authentication** : JWT    
 
-```mermaid
-graph TD
-    A[API Gateway] --> B[Service Center Service]
-    B --> C[Service Center Controller]
-    C --> D[Service Center Service Layer]
-    D --> E[Service Center Repository]
-    E --> F[H2 Database - Service Center]
+---
 
-    subgraph Service Center Service
-        C
-        D
-        E
-    end
-```
-### Invoice and Billing Service
+## Architecture Diagram
 
-- **Description**: Handles invoice generation, payment tracking, and PDF downloads.
-- **Functionality**: Links bookings and service types to billing records for accurate invoicing.
-- **Communication**: Uses Feign Client to communicate with Service Center Service and other modules.
+![image](https://github.com/user-attachments/assets/5509de9b-73bc-42dc-89d2-4d68c3b9b37e)
 
-### Invoice and Billing Service Architecture
+---
+## Module Overview
 
-```mermaid
- graph TD
-    A[API Gateway] --> B[Invoice Service]
-    B --> C[Invoice Controller]
-    C --> D[Invoice Service Layer]
-    D --> E[Invoice Repository]
-    E --> F[H2 Database - Invoice]
-    D -- Feign Client --> G[Booking Service]
-    D -- Feign Client --> H[Service Center Service]
+Each module is designed to be modular and self-contained, managing its own responsibilities and data for better scalability, maintainability, and ease of deployment.
 
-    subgraph Invoice Service
-        C
-        D
-        E
-    end
-```
-### Eureka Discovery Service
+---
 
-- **Description**: Enables dynamic service registration and discovery.
-- **Functionality**: Supports scalability and fault tolerance.
+## 🚀 Main Modules
+
+These are the core modules essential for running the Vehicle Service Booking System.
+
+### [User Management Module](./backend/UserService/README.md)
+- Handles user registration, login, profile updates, and service history tracking.
+- **Entities**: `User (UserID, Name, Email, Phone, Address, PasswordHash)`
+
+---
+
+### [Vehicle Management Module](./backend/VehicleService/README.md)
+- Allows users to register, update, and manage their vehicles, linked to their profile.
+- **Entities**: `Vehicle (VehicleID, UserID, Make, Model, Year, RegistrationNumber)`
+
+---
+
+### [Service Booking Module](./backend/BookingService/README.md)
+- Facilitates service appointment booking, rescheduling, cancellation, and status tracking.
+- **Entities**: `Booking (BookingID, UserID, VehicleID, ServiceCenterID, Date, TimeSlot, Status)`
+
+---
+
+### [Service Center Management Module](./backend/ServiceCenterService/README.md)
+- Manages service centers, assigned mechanics, and available service types.
+- **Entities**:
+  - `ServiceCenter (ServiceCenterID, Name, Location, Contact)`
+  - `Mechanic (MechanicID, ServiceCenterID, Name, Expertise)`
+  - `ServiceType (ServiceTypeID, Description, Price)`
+
+### [Invoice and Billing Module](./backend/InvoiceService/README.md)
+- Generates invoices after service completion and tracks payment status.
+- **Entities**: `Invoice (InvoiceID, BookingID, ServiceTypeID, TotalAmount, PaymentStatus)`
+
+---
+
+## 🔧 Supporting Modules
+
+These modules enhance the core functionality and improve scalability and system reliability.
+
+### [Auth Service]
+- Manages user authentication and token-based login using JWT.
+- **Entities**: `UserCredentials (UserID, Email, PasswordHash, Role)`
+
+---
 
 ### API Gateway
-
-- **Description**: Centralized entry point for all services.
-- **Functionality**: Handles routing, authentication, and logging.
-
----
-
-## Technology Stack
-
-- **Programming Language**: Java  
-- **Frameworks**: Spring Boot, Spring Cloud  
-- **Database**: H2 (In-memory)  
-- **Service Discovery**: Eureka  
-- **API Gateway**: Spring Cloud Gateway  
-- **Build Tool**: Maven  
+- Acts as the unified entry point to route incoming client requests to microservices.
+- Handles logging, CORS, rate limiting, and cross-cutting concerns.
+- 📘 **Swagger API Docs**: [`http://localhost:8080/swagger-ui.html`](http://localhost:8080/swagger-ui.html)
 
 ---
 
-## Database Table Design
-
-### Service Center Management Service
-
-#### Table: `ServiceCenter`
-
-| Field Name       | Data Type     | Description                              |
-|------------------|---------------|------------------------------------------|
-| `ServiceCenterID`| `INT`         | Primary Key, unique identifier           |
-| `Name`           | `VARCHAR(100)`| Name of the service center               |
-| `Location`       | `VARCHAR(255)`| Physical address                         |
-| `Contact`        | `VARCHAR(50)` | Contact number or email                  |
-
-#### Table: `Mechanic`
-
-| Field Name       | Data Type     | Description                              |
-|------------------|---------------|------------------------------------------|
-| `MechanicID`     | `INT`         | Primary Key, unique identifier           |
-| `ServiceCenterID`| `INT`         | Foreign Key referencing `ServiceCenterID`|
-| `Name`           | `VARCHAR(100)`| Full name of the mechanic                |
-| `Expertise`      | `VARCHAR(100)`| Area of specialization                   |
-
-#### Table: `ServiceType`
-
-| Field Name       | Data Type     | Description                              |
-|------------------|---------------|------------------------------------------|
-| `ServiceTypeID`  | `INT`         | Primary Key, unique identifier           |
-| `Description`    | `TEXT`        | Description of the service               |
-| `Price`          | `DECIMAL(10,2)`| Cost of the service                      |
+### Discovery Server (Eureka)
+- Service registry where all microservices register dynamically.
+- Enables inter-service discovery and communication.
+- 🛰️ **Eureka Dashboard**: [`http://localhost:8761`](http://localhost:8761)
 
 ---
 
-### Invoice and Billing Service
 
-#### Table: `Invoice`
+## Setup Instructions
 
-| Field Name       | Data Type     | Description                              |
-|------------------|---------------|------------------------------------------|
-| `InvoiceID`      | `INT`         | Primary Key, unique identifier           |
-| `BookingID`      | `INT`         | Foreign Key referencing `BookingID`      |
-| `ServiceTypeID`  | `INT`         | Foreign Key referencing `ServiceTypeID`  |
-| `TotalAmount`    | `DECIMAL(10,2)`| Total amount charged                     |
-| `PaymentStatus`  | `VARCHAR(20)` | Status of the payment (e.g., Paid)       |
+### 🛠️ Prerequisites
+- Java 21  
+- Maven  
+- Node.js (for React frontend)  
+- MySQL  
+
+### 🔧 Local Setup
+
+#### 1. Clone the Repository
+
+```bash
+git clone <repository-url>
+cd vehicle-service-booking-system
+````
 
 ---
 
-## Endpoints
+## 🧱 Database Setup
 
-### Service Center Management Service
+You can initialize all required MySQL databases using either a shell script or a SQL file.
 
-| Method | Endpoint                                 | Description                          |
-|--------|------------------------------------------|--------------------------------------|
-| POST   | `/api/service-centers`                   | Add a new service center             |
-| GET    | `/api/service-centers`                   | List all service centers             |
-| GET    | `/api/service-centers/{id}`              | Get service center details           |
-| POST   | `/api/service-centers/{id}/mechanics`    | Add mechanic to a center             |
-| GET    | `/api/service-centers/{id}/mechanics`    | List mechanics in a center           |
-| POST   | `/api/service-types`                     | Define a new service type            |
-| GET    | `/api/service-types`                     | List all service types               |
+### 📂 Files
 
-### Invoice and Billing Service
+* [`setup-databases.sh`](./database/setup-databases.sh): Shell script to create all required databases.
+* [`setup-databases.sql`](./database/setup-databases.sql): SQL file to create and clean tables across all databases.
 
-| Method | Endpoint                                 | Description                          |
-|--------|------------------------------------------|--------------------------------------|
-| POST   | `/api/invoices`                          | Generate invoice for a booking       |
-| GET    | `/api/invoices`                          | Get all invoices for a user          |
-| GET    | `/api/invoices/{id}`                     | Get invoice details                  |
-| PUT    | `/api/invoices/{id}/status`              | Update payment status                |
-| GET    | `/api/invoices/{id}/download`            | Download invoice PDF                 |
+---
 
-## Sequence Diagrams
+### ⚙️ Option 1: Shell Script
 
-### Service Center Management Service
+Run the shell script (you will be prompted for your MySQL root password):
 
-```mermaid
- sequenceDiagram
-    participant Admin
-    participant API Gateway
-    participant ServiceCenterService
-    participant ServiceCenterDB
-
-    Admin->>API Gateway: POST /api/service-centers
-    API Gateway->>ServiceCenterService: Route request
-    ServiceCenterService->>ServiceCenterDB: Save service center
-    ServiceCenterDB-->>ServiceCenterService: Confirmation
-    ServiceCenterService-->>API Gateway: Response
-    API Gateway-->>Admin: Service center added 
+```bash
+chmod +x database/setup-databases.sh
+./database/setup-databases.sh
 ```
 
-### Invoice and Billing Service
+---
 
-```mermaid
- sequenceDiagram
-    participant User
-    participant API Gateway
-    participant InvoiceService
-    participant BookingService
-    participant ServiceCenterService
-    participant InvoiceDB
+### 🗃️ Option 2: SQL File
 
-    User->>API Gateway: POST /api/invoices
-    API Gateway->>InvoiceService: Route request
-    InvoiceService->>BookingService: Fetch booking details
-    InvoiceService->>ServiceCenterService: Fetch service type info
-    InvoiceService->>InvoiceDB: Save invoice
-    InvoiceDB-->>InvoiceService: Confirmation
-    InvoiceService-->>API Gateway: Invoice created
-    API Gateway-->>User: Invoice details 
+Execute the SQL file directly in your MySQL client:
+
+```bash
+mysql -u root -p < database/setup-databases.sql
 ```
+
+---
+
+Once complete, your system will have the following databases ready:
+
+* `authdb`
+* `userdb`
+* `vehicledb`
+* `bookingdb`
+* `centerdb`
+* `invoicedb`
+
+> 🔐 **Note**: Ensure your MySQL user has permission to create and modify these databases.
+
+---
+
+## ⚙️ Configure Backend
+
+Update the database connection properties in:
+
+`backend/src/main/resources/application.properties`
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/vsbsdb
+spring.datasource.username=your_db_username
+spring.datasource.password=your_db_password
+spring.jpa.hibernate.ddl-auto=update
+```
+
+---
+
+## 🚀 Run the Application
+
+#### 1. Start Backend
+
+```bash
+cd backend
+mvn spring-boot:run
+```
+
+#### 2. Start Frontend
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+---
+
+## 🌐 Access the Application
+
+* **Frontend**: [http://localhost:3000](http://localhost:3000)
+* **Backend APIs**: [http://localhost:8080/api](http://localhost:8080/api)
+
+---
+
+## Testing
+
+Run backend unit tests:
+
+```bash
+mvn test
+```
+
+Test APIs using Postman or access Swagger UI at:
+
+```
+http://localhost:8080/swagger-ui.html
+```
+
+---
+
+## Deployment
+
+#### 1. Build the Application
+
+```bash
+mvn clean package
+```
+
+#### 2. Run the JAR File
+
+```bash
+java -jar target/vsbs-1.0-SNAPSHOT.jar
+```
+
+#### 3. Set Production Environment Variables
+
+```bash
+export SPRING_PROFILES_ACTIVE=prod
+export DATABASE_URL=jdbc:mysql://<production-db-url>:3306/vsbsdb
+export DATABASE_USERNAME=your_db_username
+export DATABASE_PASSWORD=your_db_password
+```
+
+#### 4. Monitor Logs
+
+```bash
+tail -f logs/vsbs-production.log
+```
+
+---
+
+## Contributors
+- Siddhi Kate
+- Rajvardhan Shinde
+- Shruti Patil
+
+---
+
+## License
+
+This project is licensed under the MIT License.  
+See the [LICENSE](./LICENSE) file for details.
